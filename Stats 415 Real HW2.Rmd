@@ -1,0 +1,62 @@
+---
+title: "Stats 415 HW2"
+author: "Margo Killey"
+date: "9/17/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+2.a) Code and coefficients below. 
+This model looks like it fits relatively well considering that the R-squared value is 0.8734, meaning ~87% of the variance in Sales can be explained by this model.
+The plot for Residuals vs. Fitted is scattered and flat, therefore we have a constant variance. There is no visible relationship. 
+```{r}
+lm.carseats <- lm(Sales ~ CompPrice + Income + Advertising + Population + Price + 
+ShelveLoc + Age + Education 
++ Urban + US, data = ISLR::Carseats)
+summary(lm.carseats)
+par(mfrow=c(2,2)) # Change the panel layout to 2 x 2
+plot(lm.carseats)
+```
+
+2.b)In summary, we are able to see which variables have significant p values. CompPrice, Income, Advertising,Price, ShelveLocGood, ShelveLocMedium, and Age all have p-values < 0.001, so they are statistically significant in the model. 
+The hypothesis corresponding to the p-value which is in the summary for Urban is 0.277.  
+
+2.c) After only keeping the variables that have a significant p-value, the R-squared value stays almost the same, at 0.872, decreasing by .012
+```{r}
+newlm.carseats <- lm(Sales ~ CompPrice + Income
+                + Advertising + Price + ShelveLoc + 
+                  Age, data = ISLR::Carseats)
+summary(newlm.carseats)
+```
+
+2.d) Now I can understand why R-squared barely changed at all, it is because the new model only using the significant predictors isn't significantly better than the model using all the predictors. Now I was wondering if the linear model was actually good at all, so I compared it to a null model with no predictors. When comparing the model with all the predictors versus the null model I saw that this model is in fact quite successful and would be considered significant. So, I believe that those predictors that aren't significant just don't really make a difference in the model. 
+```{r}
+anova(lm.carseats, newlm.carseats)
+lm.null <- lm(Sales ~ 1, data = ISLR::Carseats)
+anova(lm.null, lm.carseats)
+```
+
+2.e) Sales = 5.4752 + 0.926CompPrice + 0.0158Income + 0.1159Advertising - 0.0953Price + 4.8357ShelveLocGood + 1.9519ShelveLocMedium - 0.461Age 
+
+2.f) New Sales equation: 
+```{r}
+interactionlm.carseats <- lm(Sales ~ CompPrice + Income + Advertising + Price + ShelveLoc
+  + Age + ShelveLoc*Price, data = ISLR::Carseats)
+summary(interactionlm.carseats)
+```
+Sales = 5.8668 + 0.0926CompPrice + 0.0158Income + 0.116Advertising -0.0986Price + 4.185ShelveLocGood + 1.535ShelveLocMedium - 0.0465Age + 0.0056ShelveLocGood(Price) + 0.00365ShelveLocMedium(Price) 
+The coefficients mean that for: 
+1. ShelveLocBad Carseats, there is a -0.0986 decrease in sales for every $1 increase in price. 
+2. ShelveLocMedium Carseats, there is a -0.09495 decrease in sales for every $1 increase in price.
+3. ShelveLocGood Carseats, there is a -0.093 decrease in sales for every $1 increase in price. 
+These seem to be very miniscule differences and probably not significant, but we will see for sure in part g). 
+
+2.g)As we can see below, the interaction term is not needed because the hypothesis statistic is not <= 0.05, so therefore we can reject the interaction model. The interactions are not statistically significant. 
+```{r}
+anova(newlm.carseats, interactionlm.carseats)
+```
